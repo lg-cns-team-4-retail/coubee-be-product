@@ -1,0 +1,70 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://52.78.117.85:5432/coubee_product
+    username: coubee
+    password: Cou!bee@
+    driver-class-name: org.postgresql.Driver
+    hikari:
+#      connection-test-query: SELECT 1
+#      validation-timeout: 5000
+      minimum-idle: 4        # 최소 유휴 커넥션 수
+      maximum-pool-size: 4   # 최대 커넥션 수
+      idle-timeout: 10000    # 유휴 커넥션 유지 시간 (ms)
+      max-lifetime: 30000    # 커넥션 최대 생존 시간 (ms)
+      connection-timeout: 30000 # 커넥션 가져오기 최대 대기 시간 (ms)
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create # 개발 환경용
+    generate-ddl: true
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate.default_schema: coubee_product
+  kafka:
+    bootstrap-servers: localhost:9092
+file:
+  upload:
+    base-dir: ${user.home}/Desktop/coubee-img
+    resource-url: /images/**
+#  cloud:
+#    config:
+#      enabled: false
+#  zipkin:
+#    tracing:
+#      endpoint: http://localhost:9411/api/v2/spans
+
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0 # 0.0 ~ 1.0 사이 값 (모든 요청을 트레이싱하려면1.0)
+
+#logging:
+#  pattern:
+#    level: "%5p [%X{traceId},%X{spanId}]" # 로그에 traceId, spanId 추가
+
+#spring:
+#  cloud:
+#    discovery:
+#      client:
+#        simple:
+#          instances: # 'my-backend-service'에 대한 인스턴스 정의
+#            alim-service:
+#              - service-id: alim-service
+#                uri: http://localhost:8082
+#              - service-id: alim-service
+#                uri: http://localhost:8082
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  #    lease-renewal-interval-in-seconds: 10  # 하트비트 간격(기본 30초)
+  #    lease-expiration-duration-in-seconds: 30  # 만료 시간(기본 90초)
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
