@@ -31,6 +31,7 @@ file:
     base-dir: ${user.home}/Desktop/coubee-img
     resource-url: /images/**
 elasticsearch:
+  enable: true
   host: localhost
   port: 9200
 #  cloud:

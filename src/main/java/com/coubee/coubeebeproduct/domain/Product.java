@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "product")
@@ -38,8 +39,13 @@ public class Product extends BaseTimeEntity{
     @Column(nullable = false)
     private Long storeId;
 
+    @Column
+    @Enumerated(EnumType.STRING)
+    @Setter
+    public ProductStatus status;
+
     @Builder
-    public Product(String productName,String description,String productImg,int originPrice,int salePrice,int stock,Long storeId) {
+    public Product(String productName,String description,String productImg,int originPrice,int salePrice,int stock,Long storeId,ProductStatus status) {
         this.productName = productName;
         this.description = description;
         this.productImg = productImg;
@@ -47,12 +53,15 @@ public class Product extends BaseTimeEntity{
         this.salePrice = salePrice;
         this.stock = stock;
         this.storeId = storeId;
+        this.status = status;
     }
 
     public void updateProduct(ProductUpdateDto updateDto) {
         this.productName = updateDto.getProductName();
         this.description = updateDto.getDescription();
-        this.productImg = updateDto.getProductImg();
+        if(updateDto.getProductImg() != null&& !updateDto.getProductImg().isEmpty()) {
+            this.productImg = updateDto.getProductImg();
+        }
         this.originPrice = updateDto.getOriginPrice();
         this.salePrice = updateDto.getSalePrice();
         this.stock = updateDto.getStock();

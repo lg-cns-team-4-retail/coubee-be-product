@@ -23,11 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductAdminController {
 
     private final ProductService productService;
-      /* todo :
-        1. 상품등록
-        2. 상품 수정
-        3. 상품 이미지 저장
-     */
+
+    /* todo :
+      1. 상품등록
+      2. 상품 수정
+      3. 상품 이미지 저장
+   */
     @PostMapping("/register")
     public ApiResponseDto<String> productRegister(@RequestBody ProductRegisterDto productRegisterDto) {
         productService.productRegister(productRegisterDto);
@@ -39,6 +40,12 @@ public class ProductAdminController {
         productService.productUpdate(productUpdateDto);
         return ApiResponseDto.defaultOk();
     }
+    @PostMapping("/delete")
+    public ApiResponseDto<String> productDelete(@RequestParam Long id) {
+        productService.productDelete(id);
+        return ApiResponseDto.defaultOk();
+    }
+
     @PostMapping("/img/profile")
     public ApiResponseDto<String> productImgProfile(@RequestParam MultipartFile file) {
         String imgUrl = productService.productImgProfile(file);
@@ -46,9 +53,18 @@ public class ProductAdminController {
     }
 
     @GetMapping("/list/{storeId}")
-    public ApiResponseDto<Page<ProductResponseDto>> getMyProductList(@PathVariable Long storeId
-            , @PageableDefault(size = 6, sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
-        Page<ProductResponseDto> productPage = productService.getMyProductList(storeId,pageable);
+    public ApiResponseDto<Page<ProductResponseDto>> getMyProductList(@PathVariable Long storeId,
+                                                                     @RequestParam(defaultValue = "") String keyword
+            , @PageableDefault(size = 6, sort = "productId", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<ProductResponseDto> productPage = productService.getMyProductList(storeId, keyword,pageable);
         return ApiResponseDto.readOk(productPage);
     }
+
+    /* todo:
+        1. update product
+        2. delete product(soft)
+        3. update stock
+        4. product category(personalize 에서 리스트로 받지 못하기때문에 분석에는 사용되지 않음 그냥 사용자 뷰에 띄우는 용"
+        5. product view record -> personalize 분석에 사용
+     */
 }

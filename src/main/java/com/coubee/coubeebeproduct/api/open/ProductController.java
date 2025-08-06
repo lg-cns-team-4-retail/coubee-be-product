@@ -35,7 +35,7 @@ public class ProductController {
         List<ProductSearchResponse> list = productSearchService.hybridSearch(keyword);
         return ApiResponseDto.readOk(list);
     }
-    @GetMapping("/{productId}")
+    @GetMapping("/detail/{productId}")
     public ApiResponseDto<ProductResponseDto> getProductById(@PathVariable Long productId) {
         ProductResponseDto dto = productService.getProductById(productId);
         return ApiResponseDto.readOk(dto);
