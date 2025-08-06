@@ -3,6 +3,7 @@ package com.coubee.coubeebeproduct.service;
 import com.coubee.coubeebeproduct.common.exception.NotFound;
 import com.coubee.coubeebeproduct.common.web.context.GatewayRequestHeaderUtils;
 import com.coubee.coubeebeproduct.domain.Product;
+import com.coubee.coubeebeproduct.domain.ProductStatus;
 import com.coubee.coubeebeproduct.domain.ProductViewRecord;
 import com.coubee.coubeebeproduct.domain.dto.ProductRegisterDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
@@ -46,7 +47,7 @@ public class ProductService {
     public void productDelete(Long productId) {
         Product product = productRepository.findById(productId).orElseThrow(()->new NotFound("해당 상품이 존재하지 않습니다"));
         productViewRecordRepository.deleteByProduct(product);
-        productRepository.delete(product);
+        product.setStatus(ProductStatus.DELETED);
     }
 
     public Page<ProductResponseDto> getMyProductList(Long storeId,String keyword,Pageable pageable){
