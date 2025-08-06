@@ -21,17 +21,4 @@ public class ProductResponseDto {
     private int stock;
 
     private Long storeId;
-
-    public static ProductResponseDto from(Product product) {
-        ProductResponseDto dto = new ProductResponseDto();
-        dto.setProductId(product.getProductId());
-        dto.setProductName(product.getProductName());
-        dto.setDescription(product.getDescription());
-        dto.setProductImg(product.getProductImg());
-        dto.setOriginPrice(product.getOriginPrice());
-        dto.setSalePrice(product.getSalePrice());
-        dto.setStock(product.getStock());
-        dto.setStoreId(product.getStoreId());
-        return dto;
-    }
 }

@@ -18,7 +18,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create # 개발 환경용
+      ddl-auto: update # 개발 환경용
     generate-ddl: true
     show-sql: true
     open-in-view: false
@@ -30,6 +30,10 @@ file:
   upload:
     base-dir: ${user.home}/Desktop/coubee-img
     resource-url: /images/**
+elasticsearch:
+  enable: true
+  host: localhost
+  port: 9200
 #  cloud:
 #    config:
 #      enabled: false
@@ -58,13 +62,13 @@ file:
 #              - service-id: alim-service
 #                uri: http://localhost:8082
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  #    lease-renewal-interval-in-seconds: 10  # 하트비트 간격(기본 30초)
-  #    lease-expiration-duration-in-seconds: 30  # 만료 시간(기본 90초)
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  #    lease-renewal-interval-in-seconds: 10  # 하트비트 간격(기본 30초)
+#  #    lease-expiration-duration-in-seconds: 30  # 만료 시간(기본 90초)
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
