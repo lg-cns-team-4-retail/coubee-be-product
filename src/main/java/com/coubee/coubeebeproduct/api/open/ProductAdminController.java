@@ -40,9 +40,9 @@ public class ProductAdminController {
         productService.productUpdate(productUpdateDto);
         return ApiResponseDto.defaultOk();
     }
-    @PostMapping("/delete")
-    public ApiResponseDto<String> productDelete(@RequestParam Long id) {
-        productService.productDelete(id);
+    @PostMapping("/delete/{productId}")
+    public ApiResponseDto<String> productDelete(@PathVariable Long productId) {
+        productService.productDelete(productId);
         return ApiResponseDto.defaultOk();
     }
 
@@ -58,6 +58,11 @@ public class ProductAdminController {
             , @PageableDefault(size = 6, sort = "productId", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<ProductResponseDto> productPage = productService.getMyProductList(storeId, keyword,pageable);
         return ApiResponseDto.readOk(productPage);
+    }
+    @GetMapping("/detail/{productId}")
+    public ApiResponseDto<ProductResponseDto> getProductById(@PathVariable Long productId) {
+        ProductResponseDto dto = productService.getProductById(productId);
+        return ApiResponseDto.readOk(dto);
     }
 
     /* todo:

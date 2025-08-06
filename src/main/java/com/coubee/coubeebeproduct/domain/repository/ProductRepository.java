@@ -15,6 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
                     LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 )
+                AND p.status = 'ACTIVE'
             """)
     Page<Product> searchByKeyword(
             @Param("storeId") Long storeId,
