@@ -9,6 +9,7 @@ import com.coubee.coubeebeproduct.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -40,6 +41,7 @@ public class ProductAdminController {
         productService.productUpdate(productUpdateDto);
         return ApiResponseDto.defaultOk();
     }
+
     @PostMapping("/delete/{productId}")
     public ApiResponseDto<String> productDelete(@PathVariable Long productId) {
         productService.productDelete(productId);
@@ -55,10 +57,16 @@ public class ProductAdminController {
     @GetMapping("/list/{storeId}")
     public ApiResponseDto<Page<ProductResponseDto>> getMyProductList(@PathVariable Long storeId,
                                                                      @RequestParam(defaultValue = "") String keyword
-            , @PageableDefault(size = 6, sort = "productId", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<ProductResponseDto> productPage = productService.getMyProductList(storeId, keyword,pageable);
+            , @PageableDefault(size = 6, sort = "productId") Pageable pageable) {
+        Sort sort = pageable.getSort();
+        if (sort.getOrderFor("productId") == null) {
+            sort = sort.and(Sort.by("productId").ascending());
+        }
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        Page<ProductResponseDto> productPage = productService.getMyProductList(storeId, keyword, sortedPageable);
         return ApiResponseDto.readOk(productPage);
     }
+
     @GetMapping("/detail/{productId}")
     public ApiResponseDto<ProductResponseDto> getProductById(@PathVariable Long productId) {
         ProductResponseDto dto = productService.getProductById(productId);
