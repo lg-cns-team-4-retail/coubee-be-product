@@ -5,6 +5,7 @@ import com.coubee.coubeebeproduct.domain.Product;
 import com.coubee.coubeebeproduct.domain.dto.ProductRegisterDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductUpdateDto;
+import com.coubee.coubeebeproduct.domain.mapper.ProductMapper;
 import com.coubee.coubeebeproduct.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,15 +32,13 @@ public class ProductAdminController {
       3. 상품 이미지 저장
    */
     @PostMapping("/register")
-    public ApiResponseDto<String> productRegister(@RequestBody ProductRegisterDto productRegisterDto) {
-        productService.productRegister(productRegisterDto);
-        return ApiResponseDto.defaultOk();
+    public ApiResponseDto<ProductResponseDto> productRegister(@RequestBody ProductRegisterDto productRegisterDto) {
+        return ApiResponseDto.createOk(productService.productRegister(productRegisterDto));
     }
 
     @PostMapping("/update")
-    public ApiResponseDto<String> productUpdate(@RequestBody ProductUpdateDto productUpdateDto) {
-        productService.productUpdate(productUpdateDto);
-        return ApiResponseDto.defaultOk();
+    public ApiResponseDto<ProductResponseDto> productUpdate(@RequestBody ProductUpdateDto productUpdateDto) {
+        return ApiResponseDto.createOk(productService.productUpdate(productUpdateDto));
     }
 
     @PostMapping("/delete/{productId}")

@@ -32,16 +32,16 @@ public class ProductService {
     private final FileUploader fileUploader;
 
     @Transactional
-    public void productRegister(ProductRegisterDto productRegisterDto) {
-        productRepository.save(ProductMapper.toEntity(productRegisterDto));
+    public ProductResponseDto productRegister(ProductRegisterDto productRegisterDto) {
+        return ProductMapper.fromEntity(productRepository.save(ProductMapper.toEntity(productRegisterDto)));
     }
 
     @Transactional
-    public void productUpdate(ProductUpdateDto productUpdateDto) {
+    public ProductResponseDto productUpdate(ProductUpdateDto productUpdateDto) {
         Product product = productRepository.findById(productUpdateDto.getProductId())
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다"));
         product.updateProduct(productUpdateDto);
-        productRepository.save(product);
+        return ProductMapper.fromEntity(productRepository.save(product));
     }
     @Transactional
     public void productDelete(Long productId) {
