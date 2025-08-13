@@ -42,7 +42,7 @@ public class S3Uploader implements FileUploader{
                     .build();
 
             s3Client.putObject(request, RequestBody.fromBytes(multipartFile.getBytes()));
-            return "/"+fileName;
+            return getUrl(fileName);
 
         } catch (IOException e) {
             throw new RuntimeException("S3 파일 업로드 실패", e);
@@ -73,7 +73,7 @@ public class S3Uploader implements FileUploader{
     private String cloudFrontDomain;
 
     private String getUrl(String path) {
-        return "https://" + cloudFrontDomain + path;
+        return "https://" + cloudFrontDomain +"/"+ path;
     }
     /**
      * S3 URL에서 key 추출
