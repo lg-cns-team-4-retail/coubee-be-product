@@ -4,6 +4,7 @@ import com.coubee.coubeebeproduct.common.dto.ApiResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductSearchResponse;
 import com.coubee.coubeebeproduct.domain.elasticsearch.ProductDocument;
+import com.coubee.coubeebeproduct.remote.store.RemoteStoreService;
 import com.coubee.coubeebeproduct.service.ProductSearchService;
 import com.coubee.coubeebeproduct.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class ProductController {
 
     private final ProductSearchService productSearchService;
     private final ProductService productService;
+    private final RemoteStoreService remoteStoreService;
 
     @GetMapping("/search")
     public List<ProductDocument> searchProducts(
@@ -30,9 +32,12 @@ public class ProductController {
         return productSearchService.searchByName(keyword, page, size);
     }
     @GetMapping("/search/es")
-    public ApiResponseDto<List<ProductSearchResponse>> searchProducts(@RequestParam String keyword) {
+    public ApiResponseDto<List<ProductResponseDto>> searchProducts(@RequestParam double latitude, @RequestParam double longitude,@RequestParam(required = false,defaultValue = "") String keyword) {
         log.info("keyword :{}", keyword);
-        List<ProductSearchResponse> list = productSearchService.hybridSearch(keyword);
+        List<Long> storeIds = remoteStoreService.getNearStoreIds(latitude, longitude).getData();
+        log.info("storeIds :{}", storeIds);
+        List<Long> productIds = productSearchService.nearStoreSearchProducts(keyword,storeIds);
+        List<ProductResponseDto> list = productService.getProductsByProductIds(productIds);
         return ApiResponseDto.readOk(list);
     }
     @GetMapping("/detail/{productId}")
