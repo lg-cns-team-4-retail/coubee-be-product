@@ -59,7 +59,6 @@ public class ApiCommonAdvice {
     public ApiResponseDto<ParameterErrorDto.FieldList> handleArgumentNotValidException(MethodArgumentNotValidException e) {
         BindingResult result = e.getBindingResult();
         ParameterErrorDto.FieldList fieldList = ParameterErrorDto.FieldList.of(result);
-
         String errorMessage = fieldList.getErrorMessage();
         return ApiResponseDto.createError("ParameterNotValid", errorMessage, fieldList);
     }
@@ -67,6 +66,7 @@ public class ApiCommonAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({Exception.class})
     public ApiResponseDto<String > handleException(Exception e) {
+        e.printStackTrace();
         return ApiResponseDto.createError(
                 "ServerError",
                 "서버 에러입니다.");

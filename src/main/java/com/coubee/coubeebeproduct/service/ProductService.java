@@ -11,6 +11,8 @@ import com.coubee.coubeebeproduct.domain.dto.ProductUpdateDto;
 import com.coubee.coubeebeproduct.domain.mapper.ProductMapper;
 import com.coubee.coubeebeproduct.domain.repository.ProductRepository;
 import com.coubee.coubeebeproduct.domain.repository.ProductViewRecordRepository;
+import com.coubee.coubeebeproduct.event.producer.KafkaMessageProducer;
+import com.coubee.coubeebeproduct.event.producer.message.ProductEventMessage;
 import com.coubee.coubeebeproduct.util.FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +20,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -30,17 +36,49 @@ public class ProductService {
     private final ProductViewRecordRepository productViewRecordRepository;
 
     private final FileUploader fileUploader;
+    private final KafkaMessageProducer kafkaMessageProducer;
 
     @Transactional
     public ProductResponseDto productRegister(ProductRegisterDto productRegisterDto) {
-        return ProductMapper.fromEntity(productRepository.save(ProductMapper.toEntity(productRegisterDto)));
+        Product newProduct = productRepository.save(ProductMapper.toEntity(productRegisterDto));
+        log.info("상품 생성 완료");
+        kafkaMessageProducer.send(
+                ProductEventMessage.Topic,
+                ProductEventMessage.fromEntity("Create", newProduct)
+        );
+        log.info("상품 생성후 카프카 메세지 프로듀스 완료");
+        return ProductMapper.fromEntity(newProduct);
     }
 
     @Transactional
     public ProductResponseDto productUpdate(ProductUpdateDto productUpdateDto) {
         Product product = productRepository.findById(productUpdateDto.getProductId())
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다"));
+        String beforeName = product.getProductName();
+        String beforeDesc = product.getDescription();
         product.updateProduct(productUpdateDto);
+        String afterName = product.getProductName();
+        String afterDesc = product.getDescription();
+        boolean nameChanged = !Objects.equals(beforeName, afterName);
+        boolean descChanged = !Objects.equals(beforeDesc, afterDesc);
+        boolean changedForEvent = nameChanged || descChanged;
+        log.info("상품 수정 완료");
+        if(changedForEvent) {
+            TransactionSynchronizationManager.registerSynchronization(
+                    new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            kafkaMessageProducer.send(
+                                    ProductEventMessage.Topic,
+                                    ProductEventMessage.fromEntity("Update", product)
+                            );
+                            log.info("상품 수정 후(커밋 완료) 카프카 메시지 프로듀스 완료");
+                        }
+                    }
+            );
+        }
+        log.info("상품 수정 완료: id={}, name:{} -> {}, descChanged={}",
+                product.getProductId(), beforeName, afterName, descChanged);
         return ProductMapper.fromEntity(productRepository.save(product));
     }
     @Transactional
@@ -75,4 +113,11 @@ public class ProductService {
         );
     }
 
+
+
+
+    //// 일반 유저 기능
+    public List<ProductResponseDto> getProductsByProductIds(List<Long> productIds){
+        return productRepository.findByProductIdInOrderByProductIdDesc(productIds).stream().map(ProductMapper::fromEntity).toList();
+    }
 }
