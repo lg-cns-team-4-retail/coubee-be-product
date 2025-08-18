@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-//@FeignClient(name = "coubee-be-store-service", path = "/backend/store")
-@FeignClient(
-        name = "store-service",
-        url = "http://coubee-be-store-service.default.svc.cluster.local:8080",
-        path = "/backend/store"
-)
+@FeignClient(name = "coubee-be-store", path = "/backend/store")
+//@FeignClient(
+//        name = "store-service",
+//        url = "http://coubee-be-store-service.default.svc.cluster.local:8080",
+//        path = "/backend/store"
+//)
 public interface RemoteStoreService {
     @GetMapping(value = "/near")
     public ApiResponseDto<List<Long>> getNearStoreIds(@RequestParam double latitude, @RequestParam double longitude);
