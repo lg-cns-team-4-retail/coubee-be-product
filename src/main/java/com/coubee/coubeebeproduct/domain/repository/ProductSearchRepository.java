@@ -148,19 +148,18 @@ public class ProductSearchRepository {
                                                             )
                                                     )
                                             )
-                                            .functions(functionScores) // ✅ 리스트 전달
+                                            .functions(functionScores)
                                             .scoreMode(FunctionScoreMode.Sum)
                                             .boostMode(FunctionBoostMode.Sum)
                                     )
                             )
-                            .size(10),
+                            .size(1000),
                     ProductDocument.class
             );
 
             return response.hits().hits().stream()
                     .map(Hit::id).filter(Objects::nonNull).map(Long::parseLong)
                     .toList();
-
         } catch (IOException e) {
             throw new RuntimeException("Elasticsearch advanced query failed", e);
         }

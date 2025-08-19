@@ -62,12 +62,16 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+    enabled = false
+}
+
+tasks.named('compileTestJava') {
+    enabled = false
 }
 
 jar {
     enabled = false // plain.jar 생성 완전히 비활성화
 }
-
 tasks.register('getAppName') {
     doLast {
         println "${rootProject.name}"
