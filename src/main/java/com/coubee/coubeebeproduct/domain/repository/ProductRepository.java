@@ -25,5 +25,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
-    List<Product> findByProductIdInOrderByProductIdDesc(List<Long> productIds);
+//    List<Product> findByProductIdInOrderByProductIdDesc(List<Long> productIds);
+
+    @Query("SELECT p FROM Product p WHERE p.productId IN :productIds")
+    List<Product> findByProductIdIn(@Param("productIds") List<Long> productIds);
+
+    Page<Product> findAllByStoreId(Long storeId,Pageable pageable);
 }
