@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: api-product-config
+  name: be-product-config
 data:
   application-stg.yml: |
     server:
