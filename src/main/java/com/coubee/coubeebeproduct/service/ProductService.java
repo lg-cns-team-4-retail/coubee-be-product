@@ -143,8 +143,8 @@ public class ProductService {
         return new PageImpl<>(dtoList, pageable, productIds.size());
     }
 
-    public Page<ProductResponseDto> getProductListByStoreId(Long storeId,Pageable pageable){
-        return productRepository.findAllByStoreId(storeId, pageable)
+    public Page<ProductResponseDto> getProductListByStoreId(String keyword,Long storeId,Pageable pageable){
+        return productRepository.findAllByProductNameContainingAndStoreId(keyword,storeId, pageable)
                 .map(ProductMapper::fromEntity);
     }
 }

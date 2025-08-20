@@ -45,8 +45,8 @@ public class ProductController {
 //        return ApiResponseDto.readOk(list);
 //    }
     @GetMapping("/list")
-    public ApiResponseDto<Page<ProductResponseDto>> getProductListByStoreId(@RequestParam Long storeId,@PageableDefault(page = 0,size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return ApiResponseDto.readOk(productService.getProductListByStoreId(storeId,pageable));
+    public ApiResponseDto<Page<ProductResponseDto>> getProductListByStoreId(@RequestParam(required = false,defaultValue = "") String keyword,@RequestParam Long storeId,@PageableDefault(page = 0,size = 10, sort = {"productId", "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable){
+        return ApiResponseDto.readOk(productService.getProductListByStoreId(keyword,storeId,pageable));
     }
     @GetMapping("/search/es")
     public ApiResponseDto<Page<ProductResponseDto>> searchProducts(
