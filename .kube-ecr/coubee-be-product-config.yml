@@ -26,10 +26,10 @@ data:
           hibernate.default_schema: coubee_product
       kafka:
         bootstrap-servers: coubee-external-kafka-service:9092
-      file:
-        upload:
-          base-dir: ${user.home}/Desktop/coubee-img
-          resource-url: /images/**
+    file:
+      upload:
+        base-dir: ${user.home}/Desktop/coubee-img
+        resource-url: /images/**
     cloud:
       aws:
         region:
