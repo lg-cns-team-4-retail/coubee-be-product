@@ -30,3 +30,11 @@ data:
         upload:
           base-dir: ${user.home}/Desktop/coubee-img
           resource-url: /images/**
+    cloud:
+      aws:
+        region:
+          static: ap-northeast-2
+        s3:
+          bucket: coubee-s3
+        cloudfront:
+          domain: d1du1htkbm5yt2.cloudfront.net
