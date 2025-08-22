@@ -32,11 +32,11 @@ public class GatewayRequestHeaderUtils {
         return username;
     }
     public static Long getUserIdOrThrowException() {
-        Long userId = Long.parseLong(getUserId());
+        String userId = getUserId();
         if (userId == null) {
             throw new NotFound("헤더에 userId 정보가 없습니다.");
         }
-        return userId;
+        return Long.parseLong(userId);
     }
 
     public static String getClientDeviceOrThrowException() {

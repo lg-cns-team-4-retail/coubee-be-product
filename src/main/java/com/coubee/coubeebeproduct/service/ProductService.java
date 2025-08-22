@@ -102,24 +102,17 @@ public class ProductService {
         return fileUploader.upload(file, "product/profile");
     }
     public ProductResponseDto getProductById(Long id) {
-        Long userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
+        Long userId = 0L; // anonymous 기본값
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다."));
-        increaseViewCountIfExistsElseCreate(product,userId);
+        try {
+            userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
+        } catch (NotFound e) {
+            // 로그인 안 된 상태로 간주 (권장: 별도 Unauthenticated 예외 or Optional API)
+        }
+        productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build());
         return ProductMapper.fromEntity(product);
     }
-
-    @Transactional
-    public void increaseViewCountIfExistsElseCreate(Product product, Long userId) {
-        Optional<ProductViewRecord> pvr = productViewRecordRepository.findByProductIdAndUserId(product.getProductId(),userId);
-        pvr.ifPresentOrElse(
-                ProductViewRecord::incrementViewCount,
-                () -> productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build())
-        );
-    }
-
-
-
 
     //// 일반 유저 기능
 //    public List<ProductResponseDto> getProductsByProductIds(List<Long> productIds){
