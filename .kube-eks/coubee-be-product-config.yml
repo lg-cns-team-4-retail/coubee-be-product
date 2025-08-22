@@ -38,3 +38,7 @@ data:
           bucket: coubee-s3
         cloudfront:
           domain: d1du1htkbm5yt2.cloudfront.net
+    elasticsearch:
+      enable: true
+      host: http://10.0.4.145
+      port: 9200
