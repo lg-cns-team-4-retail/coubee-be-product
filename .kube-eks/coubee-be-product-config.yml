@@ -40,5 +40,5 @@ data:
           domain: d1du1htkbm5yt2.cloudfront.net
     elasticsearch:
       enable: true
-      host: http://10.0.4.145
+      host: es-external
       port: 9200
