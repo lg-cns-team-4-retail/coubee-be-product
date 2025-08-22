@@ -21,11 +21,9 @@ public class ProductViewRecord extends BaseTimeEntity{
     private Long userId;
 
     private Long unixTimestamp;
-    private int count;
+    private String eventType;
 
-    public void incrementViewCount() {
-        this.count++;
-    }
+
     @Builder
     public ProductViewRecord(Product product, Long userId) {
         this.product = product;
@@ -36,7 +34,7 @@ public class ProductViewRecord extends BaseTimeEntity{
 
         System.out.println("Personalize용 Unix Timestamp: " + eventTimestamp);
         this.unixTimestamp = System.currentTimeMillis()/1000;
-        this.count = 1;
+        this.eventType = "view";
     }
 }
 
