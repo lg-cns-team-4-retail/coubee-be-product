@@ -102,8 +102,19 @@ public class ProductService {
         return fileUploader.upload(file, "product/profile");
     }
     public ProductResponseDto getProductById(Long id) {
-        Long userId = 0L; // anonymous 기본값
         Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다."));
+//        try {
+//            userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
+//        } catch (NotFound e) {
+//            // 로그인 안 된 상태로 간주 (권장: 별도 Unauthenticated 예외 or Optional API)
+//        }
+//        productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build());
+        return ProductMapper.fromEntity(product);
+    }
+    public void productViewAdd(Long productId){
+        Long userId = 0L;
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다."));
         try {
             userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
@@ -111,7 +122,6 @@ public class ProductService {
             // 로그인 안 된 상태로 간주 (권장: 별도 Unauthenticated 예외 or Optional API)
         }
         productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build());
-        return ProductMapper.fromEntity(product);
     }
 
     //// 일반 유저 기능

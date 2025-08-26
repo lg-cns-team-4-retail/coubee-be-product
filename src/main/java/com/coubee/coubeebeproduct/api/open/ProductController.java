@@ -67,4 +67,9 @@ public class ProductController {
         ProductResponseDto dto = productService.getProductById(productId);
         return ApiResponseDto.readOk(dto);
     }
+    @PostMapping("/view/{productId}")
+    public ApiResponseDto<String> productViewAdd(@PathVariable Long productId) {
+        productService.productViewAdd(productId);
+        return ApiResponseDto.defaultOk();
+    }
 }
