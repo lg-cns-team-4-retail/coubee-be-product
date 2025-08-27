@@ -2,11 +2,19 @@ package com.coubee.coubeebeproduct.service;
 
 import com.coubee.coubeebeproduct.common.dto.ApiResponseDto;
 import com.coubee.coubeebeproduct.common.exception.BadParameter;
+import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.StockUpdateRequestDto;
+import com.coubee.coubeebeproduct.domain.mapper.ProductMapper;
 import com.coubee.coubeebeproduct.domain.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +44,14 @@ public class BackendProductService {
         } catch (Exception e) {
             return ApiResponseDto.createError("ERROR", "재고 수정 실패: " + e.getMessage());
         }
+    }
+
+    public Map<Long, ProductResponseDto> getProductsByIds(List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return productRepository.findAllById(productIds).stream()
+                .map(ProductMapper::fromEntity)
+                .collect(Collectors.toMap(ProductResponseDto::getProductId, Function.identity()));
     }
 }
