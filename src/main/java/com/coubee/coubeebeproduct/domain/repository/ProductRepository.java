@@ -4,6 +4,7 @@ import com.coubee.coubeebeproduct.domain.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,4 +32,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByProductIdIn(@Param("productIds") List<Long> productIds);
 
     Page<Product> findAllByProductNameContainingAndStoreId(String productName,Long storeId,Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.stock = p.stock + :quantityChange " +
+            "WHERE p.productId = :productId AND p.stock + :quantityChange >= 0")
+    int updateStock(@Param("productId") Long productId,
+                    @Param("quantityChange") int quantityChange);
 }

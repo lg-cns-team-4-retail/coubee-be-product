@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StockIncreaseEvent {
+    public static final String Topic = "stock_increase";
     private String eventId; // 이벤트 고유 ID (멱등성 처리에 사용)
     private String orderId;
     private Long userId;
