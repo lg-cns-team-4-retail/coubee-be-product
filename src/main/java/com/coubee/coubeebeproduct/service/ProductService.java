@@ -2,6 +2,7 @@ package com.coubee.coubeebeproduct.service;
 
 import com.coubee.coubeebeproduct.common.exception.NotFound;
 import com.coubee.coubeebeproduct.common.web.context.GatewayRequestHeaderUtils;
+import com.coubee.coubeebeproduct.domain.ItemRecommend;
 import com.coubee.coubeebeproduct.domain.Product;
 import com.coubee.coubeebeproduct.domain.ProductStatus;
 import com.coubee.coubeebeproduct.domain.ProductViewRecord;
@@ -9,6 +10,7 @@ import com.coubee.coubeebeproduct.domain.dto.ProductRegisterDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductUpdateDto;
 import com.coubee.coubeebeproduct.domain.mapper.ProductMapper;
+import com.coubee.coubeebeproduct.domain.repository.ItemRecommendRepository;
 import com.coubee.coubeebeproduct.domain.repository.ProductRepository;
 import com.coubee.coubeebeproduct.domain.repository.ProductViewRecordRepository;
 import com.coubee.coubeebeproduct.event.producer.KafkaMessageProducer;
@@ -26,10 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +38,7 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductViewRecordRepository productViewRecordRepository;
+    private final ItemRecommendRepository itemRecommendRepository;
 
     private final FileUploader fileUploader;
     private final KafkaMessageProducer kafkaMessageProducer;
@@ -149,5 +149,23 @@ public class ProductService {
     public Page<ProductResponseDto> getProductListByStoreId(String keyword,Long storeId,Pageable pageable){
         return productRepository.findAllByProductNameContainingAndStoreId(keyword,storeId, pageable)
                 .map(ProductMapper::fromEntity);
+    }
+
+
+    public List<ProductResponseDto> getUserRecommendProducts(Long userId) {
+        return itemRecommendRepository.findById(userId)
+                .map(itemRecommend -> {
+                    String raw = itemRecommend.getRecommendItems();
+                    String cleaned = raw.replace("[", "").replace("]", "");
+                    List<Long> productIds = Arrays.stream(cleaned.split(","))
+                            .map(String::trim)
+                            .filter(s -> !s.isEmpty())
+                            .map(Long::valueOf)
+                            .toList();
+                    return productRepository.findAllById(productIds).stream()
+                            .map(ProductMapper::fromEntity)
+                            .toList();
+                })
+                .orElseGet(List::of);
     }
 }
