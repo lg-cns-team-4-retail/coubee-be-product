@@ -117,7 +117,10 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다."));
         try {
-            userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
+            String userIdStr = GatewayRequestHeaderUtils.getUserId();
+            if(userIdStr!=null){
+                userId = Long.parseLong(userIdStr);
+            }
         } catch (NotFound e) {
             // 로그인 안 된 상태로 간주 (권장: 별도 Unauthenticated 예외 or Optional API)
         }
