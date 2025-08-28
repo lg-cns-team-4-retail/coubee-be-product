@@ -1,6 +1,7 @@
 package com.coubee.coubeebeproduct.api.open;
 
 import com.coubee.coubeebeproduct.common.dto.ApiResponseDto;
+import com.coubee.coubeebeproduct.common.web.context.GatewayRequestHeaderUtils;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
 import com.coubee.coubeebeproduct.domain.dto.ProductSearchResponse;
 import com.coubee.coubeebeproduct.domain.elasticsearch.ProductDocument;
@@ -71,5 +72,12 @@ public class ProductController {
     public ApiResponseDto<String> productViewAdd(@PathVariable Long productId) {
         productService.productViewAdd(productId);
         return ApiResponseDto.defaultOk();
+    }
+
+    @GetMapping("/personalize/recommend")
+    public ApiResponseDto<List<ProductResponseDto>> getUserRecommendProducts(){
+        Long userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
+        List<ProductResponseDto> userRecommendProducts = productService.getUserRecommendProducts(userId);
+        return ApiResponseDto.readOk(userRecommendProducts);
     }
 }
