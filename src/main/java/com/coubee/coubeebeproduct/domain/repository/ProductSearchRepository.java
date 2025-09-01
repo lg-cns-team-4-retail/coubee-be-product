@@ -75,10 +75,15 @@ public class ProductSearchRepository {
                                     .scriptScore(ss -> ss
                                             .query(innerQ -> innerQ
                                                     .bool(b -> b
+                                                            // ✅ storeId 필터
                                                             .must(m -> m.terms(t -> t
                                                                     .field("store_id")
-                                                                    .terms(ts -> ts.value(storeIds.stream().map(FieldValue::of).toList()))
+                                                                    .terms(ts -> ts.value(storeIds.stream()
+                                                                            .map(FieldValue::of)
+                                                                            .toList()))
                                                             ))
+                                                            // ✅ vector_raw 있는 문서만
+                                                            .must(m -> m.exists(e -> e.field("vector_raw")))
                                                             .should(sq1 -> sq1.matchPhrase(mp -> mp
                                                                     .field("product_name")
                                                                     .query(keyword)
@@ -99,7 +104,7 @@ public class ProductSearchRepository {
                                                     )
                                             )
                                             .script(sc -> sc
-                                                    .source("cosineSimilarity(params.query_vector, 'vector_raw') + 1.0")
+                                                    .source("cosineSimilarity(params.query_vector, doc['vector_raw'].vectorValue) + 1.0")
                                                     .params("query_vector", JsonData.of(queryVector))
                                             )
                                     )
@@ -118,4 +123,5 @@ public class ProductSearchRepository {
             throw new RuntimeException("Elasticsearch Hybrid query failed", e);
         }
     }
+
 }
