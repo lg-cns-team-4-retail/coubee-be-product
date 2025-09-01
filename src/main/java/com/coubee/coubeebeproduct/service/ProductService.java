@@ -92,7 +92,7 @@ public class ProductService {
         productViewRecordRepository.deleteByProduct(product);
         product.setStatus(ProductStatus.DELETED);
     }
-
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getMyProductList(Long storeId,String keyword,Pageable pageable){
         if (keyword == null) keyword = "";
         Page<Product> products = productRepository.searchByKeyword(storeId,keyword,pageable);
@@ -131,7 +131,7 @@ public class ProductService {
 //    public List<ProductResponseDto> getProductsByProductIds(List<Long> productIds){
 //        return productRepository.findByProductIdInOrderByProductIdDesc(productIds).stream().map(ProductMapper::fromEntity).toList();
 //    }
-
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProductsByProductIds(List<Long> productIds, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), productIds.size());
@@ -148,13 +148,13 @@ public class ProductService {
                 .toList();
         return new PageImpl<>(dtoList, pageable, productIds.size());
     }
-
+    @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProductListByStoreId(String keyword,Long storeId,Pageable pageable){
         return productRepository.findAllByProductNameContainingAndStoreId(keyword,storeId, pageable)
                 .map(ProductMapper::fromEntity);
     }
 
-
+    @Transactional(readOnly = true)
     public List<ProductResponseDto> getUserRecommendProducts(Long userId) {
         return itemRecommendRepository.findById(userId)
                 .map(itemRecommend -> {

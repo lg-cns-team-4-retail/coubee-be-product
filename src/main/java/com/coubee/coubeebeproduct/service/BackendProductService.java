@@ -45,7 +45,7 @@ public class BackendProductService {
             return ApiResponseDto.createError("ERROR", "재고 수정 실패: " + e.getMessage());
         }
     }
-
+    @Transactional(readOnly = true)
     public Map<Long, ProductResponseDto> getProductsByIds(List<Long> productIds) {
         if (productIds == null || productIds.isEmpty()) {
             return Collections.emptyMap();
