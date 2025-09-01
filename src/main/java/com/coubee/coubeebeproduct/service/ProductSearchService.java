@@ -36,6 +36,9 @@ public class ProductSearchService {
     }
 
     public List<Long> nearStoreSearchProducts(String keyword, List<Long> storeIds) {
-        return productSearchRepository.nearStoreSearchProducts(keyword,storeIds);
+        return productSearchRepository.nearStoreSearchProductsKnn(keyword,storeIds);
+    }
+    public List<Long> nearStoreSearchProductsV2(String keyword, List<Long> storeIds) {
+        return productSearchRepository.nearStoreSearchProductsHybrid(keyword,storeIds);
     }
 }
