@@ -63,6 +63,20 @@ public class ProductController {
         Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
         return ApiResponseDto.readOk(pagedProducts);
     }
+    @GetMapping("/search/es/v2")
+    public ApiResponseDto<Page<ProductResponseDto>> searchProductsV2(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "") String keyword,
+            Pageable pageable
+    ) {
+        log.info("keyword :{}", keyword);
+        List<Long> storeIds = remoteStoreService.getNearStoreIds(latitude, longitude).getData();
+        log.info("storeIds :{}", storeIds);
+        List<Long> productIds = productSearchService.nearStoreSearchProductsV2(keyword, storeIds);
+        Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
+        return ApiResponseDto.readOk(pagedProducts);
+    }
     @GetMapping("/search/{storeId}")
     public ApiResponseDto<Page<ProductResponseDto>> searchProductsInStore(
             @RequestParam(defaultValue = "") String keyword,
