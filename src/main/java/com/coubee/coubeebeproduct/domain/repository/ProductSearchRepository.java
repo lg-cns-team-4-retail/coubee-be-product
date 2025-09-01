@@ -99,7 +99,7 @@ public class ProductSearchRepository {
                                                     )
                                             )
                                             .script(sc -> sc
-                                                    .source("cosineSimilarity(params.query_vector, 'vector_raw') + _score * 2")
+                                                    .source("cosineSimilarity(params.query_vector, 'vector_raw') + 1.0")
                                                     .params("query_vector", JsonData.of(queryVector))
                                             )
                                     )
