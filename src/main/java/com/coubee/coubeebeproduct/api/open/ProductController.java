@@ -63,6 +63,19 @@ public class ProductController {
         Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
         return ApiResponseDto.readOk(pagedProducts);
     }
+    @GetMapping("/search/{storeId}")
+    public ApiResponseDto<Page<ProductResponseDto>> searchProductsInStore(
+            @RequestParam(defaultValue = "") String keyword,
+            @PathVariable Long storeId,
+            Pageable pageable
+    ) {
+        log.info("keyword :{}", keyword);
+        List<Long> storeIds = List.of(storeId);
+        log.info("storeIds :{}", storeIds);
+        List<Long> productIds = productSearchService.nearStoreSearchProducts(keyword, storeIds);
+        Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
+        return ApiResponseDto.readOk(pagedProducts);
+    }
     @GetMapping("/detail/{productId}")
     public ApiResponseDto<ProductResponseDto> getProductById(@PathVariable Long productId) {
         ProductResponseDto dto = productService.getProductById(productId);

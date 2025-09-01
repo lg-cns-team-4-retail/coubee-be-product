@@ -35,10 +35,6 @@ public class ProductSearchService {
                 .toList();
     }
 
-    public List<ProductSearchResponse> hybridSearch(String keyword) {
-        return productSearchRepository.hybridSearch(keyword);
-    }
-
     public List<Long> nearStoreSearchProducts(String keyword, List<Long> storeIds) {
         return productSearchRepository.nearStoreSearchProducts(keyword,storeIds);
     }
