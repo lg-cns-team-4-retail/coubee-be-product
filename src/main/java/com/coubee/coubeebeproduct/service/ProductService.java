@@ -2,7 +2,6 @@ package com.coubee.coubeebeproduct.service;
 
 import com.coubee.coubeebeproduct.common.exception.NotFound;
 import com.coubee.coubeebeproduct.common.web.context.GatewayRequestHeaderUtils;
-import com.coubee.coubeebeproduct.domain.ItemRecommend;
 import com.coubee.coubeebeproduct.domain.Product;
 import com.coubee.coubeebeproduct.domain.ProductStatus;
 import com.coubee.coubeebeproduct.domain.ProductViewRecord;
@@ -18,7 +17,6 @@ import com.coubee.coubeebeproduct.event.producer.message.ProductEventMessage;
 import com.coubee.coubeebeproduct.util.FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.StoreManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +26,10 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -104,12 +105,6 @@ public class ProductService {
     public ProductResponseDto getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NotFound("해당 상품이 존재하지 않습니다."));
-//        try {
-//            userId = GatewayRequestHeaderUtils.getUserIdOrThrowException();
-//        } catch (NotFound e) {
-//            // 로그인 안 된 상태로 간주 (권장: 별도 Unauthenticated 예외 or Optional API)
-//        }
-//        productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build());
         return ProductMapper.fromEntity(product);
     }
     public void productViewAdd(Long productId){
@@ -126,11 +121,6 @@ public class ProductService {
         }
         productViewRecordRepository.save(ProductViewRecord.builder().product(product).userId(userId).build());
     }
-
-    //// 일반 유저 기능
-//    public List<ProductResponseDto> getProductsByProductIds(List<Long> productIds){
-//        return productRepository.findByProductIdInOrderByProductIdDesc(productIds).stream().map(ProductMapper::fromEntity).toList();
-//    }
     @Transactional(readOnly = true)
     public Page<ProductResponseDto> getProductsByProductIds(List<Long> productIds, Pageable pageable) {
         int start = (int) pageable.getOffset();

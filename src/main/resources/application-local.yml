@@ -60,7 +60,7 @@ elasticsearch:
 #                uri: http://localhost:8082
 #              - service-id: alim-service
 #                uri: http://localhost:8082
-
+embedding_url: http://localhost:8089
 eureka:
   instance:
     prefer-ip-address: true

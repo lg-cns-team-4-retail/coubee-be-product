@@ -42,3 +42,13 @@ data:
       enable: true
       host: es-external
       port: 9200
+    embeddingUrl: http://embedding-external:8089
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: prometheus, health, info
+      prometheus:
+        metrics:
+          export:
+            enabled: true

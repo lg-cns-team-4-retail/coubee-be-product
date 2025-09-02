@@ -1,6 +1,5 @@
 package com.coubee.coubeebeproduct.service;
 
-import com.coubee.coubeebeproduct.domain.dto.ProductSearchResponse;
 import com.coubee.coubeebeproduct.domain.elasticsearch.ProductDocument;
 import com.coubee.coubeebeproduct.domain.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +35,12 @@ public class ProductSearchService {
     }
 
     public List<Long> nearStoreSearchProducts(String keyword, List<Long> storeIds) {
-        return productSearchRepository.nearStoreSearchProductsKnn(keyword,storeIds);
+        return productSearchRepository.defaultSearch(keyword,storeIds);
     }
-    public List<Long> nearStoreSearchProductsV2(String keyword, List<Long> storeIds) {
+    public List<Long> nearStoreSearchProductsHybrid(String keyword, List<Long> storeIds) {
         return productSearchRepository.nearStoreSearchProductsHybrid(keyword,storeIds);
+    }
+    public List<Long> nearStoreSearchProductsKnn(String keyword, List<Long> storeIds) {
+        return productSearchRepository.nearStoreSearchProductsKnn(keyword,storeIds);
     }
 }

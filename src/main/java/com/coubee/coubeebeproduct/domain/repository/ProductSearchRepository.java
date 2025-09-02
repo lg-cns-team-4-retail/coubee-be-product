@@ -2,6 +2,8 @@ package com.coubee.coubeebeproduct.domain.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
@@ -28,11 +30,9 @@ public class ProductSearchRepository {
     public List<Long> nearStoreSearchProductsKnn(String keyword, List<Long> storeIds) {
         try {
             long start = System.currentTimeMillis();
-            // FastAPI 호출해서 벡터 가져오기
             List<Float> queryVector = embeddingService.embed(keyword);
             log.info("queryVector: {}", queryVector);
 
-            // ES KNN 쿼리 실행 (vector_knn 사용)
             SearchResponse<ProductDocument> response = esClient.search(s -> s
                             .index(INDEX)
                             .knn(knn -> knn
@@ -49,7 +49,7 @@ public class ProductSearchRepository {
                             ),
                     ProductDocument.class
             );
-            long end = System.currentTimeMillis(); // 종료 시간 기록
+            long end = System.currentTimeMillis();
             log.info("[KNN] 검색 완료: {} ms (keyword: {}, storeIds: {})",
                     (end - start), keyword, storeIds.size());
             return response.hits().hits().stream()
@@ -64,11 +64,9 @@ public class ProductSearchRepository {
     public List<Long> nearStoreSearchProductsHybrid(String keyword, List<Long> storeIds) {
         try {
             long start = System.currentTimeMillis();
-            // FastAPI 호출해서 벡터 가져오기
             List<Float> queryVector = embeddingService.embed(keyword);
             log.info("queryVector: {}", queryVector);
 
-            // Hybrid 검색: BM25 + cosineSimilarity(vector_raw)
             SearchResponse<ProductDocument> response = esClient.search(s -> s
                             .index(INDEX)
                             .query(q -> q
@@ -104,7 +102,7 @@ public class ProductSearchRepository {
                                                     )
                                             )
                                             .script(sc -> sc
-                                                    .source("cosineSimilarity(params.query_vector, doc['vector_raw'].vectorValue) + 1.0")
+                                                    .source("_score + cosineSimilarity(params.query_vector, 'vector_raw')")
                                                     .params("query_vector", JsonData.of(queryVector))
                                             )
                                     )
@@ -124,4 +122,65 @@ public class ProductSearchRepository {
         }
     }
 
+
+    public List<Long> defaultSearch(String keyword, List<Long> storeIds) {
+        try {
+            SearchResponse<ProductDocument> response = esClient.search(s -> s
+                            .index("products")
+                            .query(q -> q
+                                    .functionScore(fs -> fs
+                                            .query(innerQ -> innerQ
+                                                    .bool(b -> b
+                                                            .must(m -> m.terms(t -> t
+                                                                    .field("store_id")
+                                                                    .terms(ts -> ts.value(storeIds.stream()
+                                                                            .map(FieldValue::of)
+                                                                            .toList()))
+                                                            ))
+                                                            .should(sh -> sh.matchPhrase(mp -> mp
+                                                                    .field("product_name")
+                                                                    .query(keyword)
+                                                                    .boost(10.0f)
+                                                            ))
+                                                            .should(sh -> sh.match(m -> m
+                                                                    .field("product_name")
+                                                                    .query(keyword)
+                                                                    .fuzziness("AUTO")
+                                                                    .boost(2.0f)
+                                                            ))
+                                                            .should(sh -> sh.match(m -> m
+                                                                    .field("description")
+                                                                    .query(keyword)
+                                                                    .fuzziness("AUTO")
+                                                                    .boost(1.0f)
+                                                            ))
+                                                    )
+                                            )
+                                            .functions(f -> f
+                                                    .filter(fq -> fq.match(m -> m
+                                                            .field("product_name.edge")
+                                                            .query(keyword)
+                                                    ))
+                                                    .weight(30.0)
+                                            )
+                                            .functions(f -> f
+                                                    .filter(fq -> fq.wildcard(wc -> wc
+                                                            .field("product_name.keyword")
+                                                            .value(keyword)
+                                                    ))
+                                                    .weight(50.0)
+                                            )
+                                            .scoreMode(FunctionScoreMode.Sum)
+                                            .boostMode(FunctionBoostMode.Sum)
+                                    )
+                            ),
+                    ProductDocument.class
+            );
+            return response.hits().hits().stream()
+                    .map(Hit::id).filter(Objects::nonNull).map(Long::parseLong)
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException("Elasticsearch Hybrid query failed", e);
+        }
+    }
 }

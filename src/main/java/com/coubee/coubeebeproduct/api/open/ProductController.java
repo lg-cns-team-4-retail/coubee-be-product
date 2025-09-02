@@ -3,7 +3,6 @@ package com.coubee.coubeebeproduct.api.open;
 import com.coubee.coubeebeproduct.common.dto.ApiResponseDto;
 import com.coubee.coubeebeproduct.common.web.context.GatewayRequestHeaderUtils;
 import com.coubee.coubeebeproduct.domain.dto.ProductResponseDto;
-import com.coubee.coubeebeproduct.domain.dto.ProductSearchResponse;
 import com.coubee.coubeebeproduct.domain.elasticsearch.ProductDocument;
 import com.coubee.coubeebeproduct.remote.store.RemoteStoreService;
 import com.coubee.coubeebeproduct.service.ProductSearchService;
@@ -36,19 +35,12 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size) {
         return productSearchService.searchByName(keyword, page, size);
     }
-//    @GetMapping("/search/es")
-//    public ApiResponseDto<List<ProductResponseDto>> searchProducts(@RequestParam double latitude, @RequestParam double longitude,@RequestParam(required = false,defaultValue = "") String keyword) {
-//        log.info("keyword :{}", keyword);
-//        List<Long> storeIds = remoteStoreService.getNearStoreIds(latitude, longitude).getData();
-//        log.info("storeIds :{}", storeIds);
-//        List<Long> productIds = productSearchService.nearStoreSearchProducts(keyword,storeIds);
-//        List<ProductResponseDto> list = productService.getProductsByProductIds(productIds);
-//        return ApiResponseDto.readOk(list);
-//    }
+
     @GetMapping("/list")
     public ApiResponseDto<Page<ProductResponseDto>> getProductListByStoreId(@RequestParam(required = false,defaultValue = "") String keyword,@RequestParam Long storeId,@PageableDefault(page = 0,size = 10, sort = {"productId", "createdAt"}, direction = Sort.Direction.DESC) Pageable pageable){
         return ApiResponseDto.readOk(productService.getProductListByStoreId(keyword,storeId,pageable));
     }
+
     @GetMapping("/search/es")
     public ApiResponseDto<Page<ProductResponseDto>> searchProducts(
             @RequestParam double latitude,
@@ -63,7 +55,7 @@ public class ProductController {
         Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
         return ApiResponseDto.readOk(pagedProducts);
     }
-    @GetMapping("/search/es/v2")
+    @GetMapping("/search/es/hybrid")
     public ApiResponseDto<Page<ProductResponseDto>> searchProductsV2(
             @RequestParam double latitude,
             @RequestParam double longitude,
@@ -73,7 +65,21 @@ public class ProductController {
         log.info("keyword :{}", keyword);
         List<Long> storeIds = remoteStoreService.getNearStoreIds(latitude, longitude).getData();
         log.info("storeIds :{}", storeIds);
-        List<Long> productIds = productSearchService.nearStoreSearchProductsV2(keyword, storeIds);
+        List<Long> productIds = productSearchService.nearStoreSearchProductsHybrid(keyword, storeIds);
+        Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
+        return ApiResponseDto.readOk(pagedProducts);
+    }
+    @GetMapping("/search/es/knn")
+    public ApiResponseDto<Page<ProductResponseDto>> searchProductsKnn(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "") String keyword,
+            Pageable pageable
+    ) {
+        log.info("keyword :{}", keyword);
+        List<Long> storeIds = remoteStoreService.getNearStoreIds(latitude, longitude).getData();
+        log.info("storeIds :{}", storeIds);
+        List<Long> productIds = productSearchService.nearStoreSearchProductsKnn(keyword, storeIds);
         Page<ProductResponseDto> pagedProducts = productService.getProductsByProductIds(productIds, pageable);
         return ApiResponseDto.readOk(pagedProducts);
     }
