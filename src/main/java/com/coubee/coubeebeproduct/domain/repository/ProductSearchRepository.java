@@ -32,32 +32,37 @@ public class ProductSearchRepository {
      */
     private Query buildQuery(String fieldToSearch, String keyword, List<Long> storeIds, boolean useFuzziness) {
         return Query.of(q -> q
-                .bool(b -> b
-                        .must(m -> m.terms(t -> t
-                                .field("store_id")
-                                .terms(ts -> ts.value(storeIds.stream().map(FieldValue::of).toList()))
-                        ))
-                        .must(m -> m.exists(e -> e.field("vector_raw")))
-                        .should(sq1 -> sq1.matchPhrase(mp -> mp
-                                .field(fieldToSearch)
+                .bool(b -> {
+                    b.must(m -> m.terms(t -> t
+                            .field("store_id")
+                            .terms(ts -> ts.value(storeIds.stream().map(FieldValue::of).toList()))
+                    ));
+                    b.must(m -> m.exists(e -> e.field("vector_raw")));
+
+                    b.should(sq1 -> sq1.matchPhrase(mp -> mp
+                            .field(fieldToSearch)
+                            .query(keyword)
+                            .boost(10.0f)
+                    ));
+
+                    b.should(sq2 -> sq2.match(m -> {
+                        m.field(fieldToSearch)
                                 .query(keyword)
-                                .boost(10.0f)
-                        ))
-                        .should(sq2 -> sq2.match(m -> {
-                            m.field(fieldToSearch)
-                                    .query(keyword)
-                                    .boost(2.0f);
-                            if (useFuzziness) {
-                                m.fuzziness("AUTO");
-                            }
-                            return m;
-                        }))
-                        .should(sq3 -> sq3.matchPhrase(m -> m
+                                .boost(2.0f);
+                        if (useFuzziness) {
+                            m.fuzziness("AUTO");
+                        }
+                        return m;
+                    }));
+                    if (keyword.length() > 1) {
+                        b.should(sq3 -> sq3.matchPhrase(m -> m
                                 .field("description.ngram")
                                 .query(keyword)
                                 .boost(0.1f)
-                        ))
-                )
+                        ));
+                    }
+                    return b;
+                })
         );
     }
     /**
@@ -107,14 +112,14 @@ public class ProductSearchRepository {
 
             long start = System.currentTimeMillis();
             List<Float> queryVector = embeddingService.embed(keyword);
-
+            log.info("queryVector : {}", queryVector);
             SearchResponse<ProductDocument> response;
 
             if (keyword.length() == 1) {
                 //한 글자 검색어는 vector score 제외 (scriptScore 미사용)
                 response = esClient.search(s -> s
                                 .index(INDEX)
-                                .minScore(2.0) // 필요시 조정
+                                .minScore(15.0) // 필요시 조정
                                 .query(buildQuery(fieldToSearch, keyword, storeIds, useFuzziness))
                                 .size(1000),
                         ProductDocument.class
@@ -123,7 +128,7 @@ public class ProductSearchRepository {
                 //두 글자 이상은 hybrid (text + vector)
                 response = esClient.search(s -> s
                                 .index(INDEX)
-                                .minScore(2.64)
+                                .minScore(5.0)
                                 .query(q -> q
                                         .scriptScore(ss -> ss
                                                 .query(buildQuery(fieldToSearch, keyword, storeIds, useFuzziness))
