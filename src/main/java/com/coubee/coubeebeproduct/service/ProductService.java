@@ -50,7 +50,7 @@ public class ProductService {
         log.info("상품 생성 완료");
         kafkaMessageProducer.send(
                 ProductEventMessage.Topic,
-                ProductEventMessage.fromEntity("Create", newProduct)
+                ProductEventMessage.fromEntity("CREATE", newProduct)
         );
         log.info("상품 생성후 카프카 메세지 프로듀스 완료");
         return ProductMapper.fromEntity(newProduct);
@@ -76,7 +76,7 @@ public class ProductService {
                         public void afterCommit() {
                             kafkaMessageProducer.send(
                                     ProductEventMessage.Topic,
-                                    ProductEventMessage.fromEntity("Update", product)
+                                    ProductEventMessage.fromEntity("UPDATE", product)
                             );
                             log.info("상품 수정 후(커밋 완료) 카프카 메시지 프로듀스 완료");
                         }
