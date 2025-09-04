@@ -19,6 +19,3 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false  # 타입 헤더 추가 비활성화
-server:
-  tomcat:
-    relaxed-query-chars: "[,]"
