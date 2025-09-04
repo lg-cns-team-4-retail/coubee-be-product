@@ -43,4 +43,7 @@ public class ProductSearchService {
     public List<Long> nearStoreSearchProductsKnn(String keyword, List<Long> storeIds) {
         return productSearchRepository.nearStoreSearchProductsKnn(keyword,storeIds);
     }
+    public List<Long> searchProductsV4SmartHybrid(String keyword,List<Long> storeIds){
+        return productSearchRepository.searchProductsV4SmartHybrid(keyword, storeIds);
+    }
 }
