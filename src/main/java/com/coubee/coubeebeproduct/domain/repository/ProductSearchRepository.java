@@ -201,7 +201,7 @@ public class ProductSearchRepository {
     public List<Long> searchProductsV4SmartHybrid(String keyword, List<Long> storeIds) {
         try {
             final boolean singleChar = keyword != null && keyword.length() == 1;
-
+            boolean useFuzziness = keyword.length() > 1;
             // 공통: store 필터
             Query storeFilter = Query.of(q -> q.terms(t -> t
                     .field("store_id")
@@ -227,7 +227,7 @@ public class ProductSearchRepository {
                     // 2자 이상: ko_search의 동의어 효력 극대화 (product_name을 가장 강하게)
                     b.should(sq -> sq.multiMatch(mm -> mm
                             .query(keyword)
-                            .type(TextQueryType.BestFields)  // ← 여기
+                            .type(TextQueryType.BestFields)
                             .operator(Operator.Or)
                             .tieBreaker(0.3)
                             .fields("product_name^6", "product_name.ngram^2", "description^0.5")
