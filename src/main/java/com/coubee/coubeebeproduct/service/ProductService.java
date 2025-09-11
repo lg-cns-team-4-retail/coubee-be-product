@@ -48,11 +48,18 @@ public class ProductService {
     public ProductResponseDto productRegister(ProductRegisterDto productRegisterDto) {
         Product newProduct = productRepository.save(ProductMapper.toEntity(productRegisterDto));
         log.info("상품 생성 완료");
-        kafkaMessageProducer.send(
-                ProductEventMessage.Topic,
-                ProductEventMessage.fromEntity("CREATE", newProduct)
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        kafkaMessageProducer.send(
+                                ProductEventMessage.Topic,
+                                ProductEventMessage.fromEntity("CREATE", newProduct)
+                        );
+                        log.info("상품 수정 후(커밋 완료) 카프카 메시지 프로듀스 완료");
+                    }
+                }
         );
-        log.info("상품 생성후 카프카 메세지 프로듀스 완료");
         return ProductMapper.fromEntity(newProduct);
     }
 
