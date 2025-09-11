@@ -9,7 +9,7 @@ data:
 
     spring:
       datasource:
-        url: jdbc:postgresql://52.78.117.85:5432/coubee_product
+        url: jdbc:postgresql://coubee-postgres.c5g4a4ekcfvb.ap-northeast-2.rds.amazonaws.com:5432/coubee_product
         driver-class-name: org.postgresql.Driver
         hikari:
           connection-test-query: SELECT 1
